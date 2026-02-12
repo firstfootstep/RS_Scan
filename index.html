@@ -93,11 +93,11 @@ tr:nth-child(even) {
 <script>
 
 let stockData = [];
+let debounceTimer;
 
 fetch("rs_data.json")
     .then(res => res.json())
     .then(data => {
-        // sort descending by RS
         data.sort((a, b) => b.rs_rank - a.rs_rank);
         stockData = data;
         renderTable(data);
@@ -105,21 +105,18 @@ fetch("rs_data.json")
 
 function renderTable(data) {
     const tbody = document.getElementById("tableBody");
-    tbody.innerHTML = "";
-
     document.getElementById("stockCount").innerText = data.length;
 
-    data.forEach(stock => {
-        const row = `
-            <tr>
-                <td>${stock.name}</td>
-                <td>${stock.description}</td>
-                <td>${stock.sector}</td>
-                <td>${stock.rs_rank ? stock.rs_rank.toFixed(2) : ""}</td>
-            </tr>
-        `;
-        tbody.innerHTML += row;
-    });
+    const rows = data.map(stock => `
+        <tr>
+            <td>${stock.name}</td>
+            <td>${stock.description}</td>
+            <td>${stock.sector}</td>
+            <td>${stock.rs_rank ? stock.rs_rank.toFixed(2) : ""}</td>
+        </tr>
+    `);
+
+    tbody.innerHTML = rows.join("");
 }
 
 function applyFilters() {
@@ -141,10 +138,16 @@ function applyFilters() {
     renderTable(filtered);
 }
 
+// Debounce search
+document.getElementById("searchBox").addEventListener("input", function() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(applyFilters, 200);
+});
+
 document.getElementById("rsFilter").addEventListener("change", applyFilters);
-document.getElementById("searchBox").addEventListener("input", applyFilters);
 
 </script>
+
 
 </body>
 </html>
