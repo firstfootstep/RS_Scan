@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>RS Stock Screener</title>
+    <style>
+        body { font-family: Arial; padding: 30px; }
+        select { padding: 8px; margin-bottom: 20px; }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+
+<h2>RS Stock Screener</h2>
+
+<label>Select RS Category:</label>
+<select id="filter">
+    <option value="ALL">All</option>
+    <option value="RS Below 80">RS Below 80</option>
+    <option value="RS80-85">RS80-85</option>
+    <option value="RS85-90">RS85-90</option>
+    <option value="RS90-95">RS90-95</option>
+    <option value="RS95-100">RS95-100</option>
+</select>
+
+<table>
+    <thead>
+        <tr>
+            <th>Symbol</th>
+            <th>Description</th>
+            <th>Sector</th>
+            <th>RS Rank</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+</table>
+
+<script>
+let stockData = [];
+
+fetch("rs_data.json")
+    .then(res => res.json())
+    .then(data => {
+        stockData = data;
+        renderTable(data);
+    });
+
+function renderTable(data) {
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    data.forEach(stock => {
+        const row = `
+            <tr>
+                <td>${stock.name}</td>
+                <td>${stock.description}</td>
+                <td>${stock.sector}</td>
+                <td>${stock.rs_rank ?? ""}</td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+}
+
+document.getElementById("filter").addEventListener("change", function() {
+    const value = this.value;
+
+    if (value === "ALL") {
+        renderTable(stockData);
+    } else {
+        const filtered = stockData.filter(
+            stock => stock.rs_category === value
+        );
+        renderTable(filtered);
+    }
+});
+</script>
+
+</body>
+</html>
